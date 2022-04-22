@@ -11,7 +11,10 @@ crate-type = ["cdylib"]
 [dependencies]
 console_error_panic_hook = "0.1.7"
 env_logger = "0.9.0"
+game-of-life = { git = "https://github.com/s1gtrap/game-of-life", rev = "3e192cf" }
+getrandom = { version = "0.2", features = ["js"] }
 log = "0.4.16"
+rand = "0.8.5"
 wasm-bindgen = "0.2.80"
 wasm-logger = "0.2.0"
-web-sys = { version = "0.3.57", features = ["CanvasRenderingContext2d", "ImageData"] }
+web-sys = "0.3.57"
