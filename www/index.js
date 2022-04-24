@@ -38,7 +38,40 @@ async function run_wasm() {
         console.log('render');
     });
 
-    const states = [...Array(oc.width * oc.height).keys()].map((d) => [0, 0, 0, Math.random() > 0.9 ? 255 : 0]).flat();
+    function load(w, h, s) {
+        const data = Array(w * h * 4);
+        const lines = s.split('\n');
+        if (lines.length >= h) {
+            throw new Error('game of life map height out of bounds');
+        }
+        for (let [i, line] of Object.entries(lines)) {
+            if (line.length >= w) {
+                throw new Error(`game of life map width at line ${i} out of bounds`);
+            }
+            for (let j = 0; j < line.length; j++) {
+                console.log(line[j]);
+                data[i * w * 4 + j * 4 + 3] = line[j] === ' ' ? 0 : 255;
+            }
+        }
+        return data;
+    }
+
+    const states = load(oc.width, oc.height, ` #
+ #
+ #
+
+        ###
+
+      #     #
+      #     #
+      #     #
+
+        ###
+
+
+ `);
+    console.log(states);
+
     w.postMessage({ type: 'init', width: oc.width, height: oc.height, states });
     w.postMessage({ type: 'step' });
 
