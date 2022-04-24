@@ -8,8 +8,8 @@ async function run_wasm() {
     // `wasm_bindgen` was imported in `index.html`
     //await wasm_bindgen('./pkg/game_of_life_web_bg.wasm');
 
-    const width = 5;
-    const height = 5;
+    const width = 1000;
+    const height = 1000;
 
     const w = new Worker('./worker.js');
     let c = document.createElement('canvas');
@@ -22,20 +22,18 @@ async function run_wasm() {
     let id = new ImageData(width, height);
     //id.data.set([120, 180, 44, 255, 99, 110, 255, 255, 0, 0, 255, 255, 255, 0, 0, 255])
     //ctx.putImageData(id, 0, 0);
+    let t;
     w.addEventListener('message', (e) => {
+        console.log(performance.now() - t);
         id.data.set(e.data);
         ctx.putImageData(id, 0, 0);
+        console.log(performance.now() - t);
     });
-    const states = [
-        0, 0, 0, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 0, 0, 0,
-    ].map((d) => [0, 0, 0, d * 255]).flat();
+    const states = [...Array(width * height).keys()].map((d) => [0, 0, 0, Math.random() > 0.9 ? 255 : 0]).flat();
     console.log(states.length);
     w.postMessage({ width, height, states });
     document.body.addEventListener('click', () => {
+        t = performance.now();
         w.postMessage(null);
     })
     document.body.appendChild(c);
