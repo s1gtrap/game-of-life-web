@@ -1,46 +1,53 @@
-// We only need `startup` here which is the main entry point
-// In theory, we could also use all other functions/struct types from Rust which we have bound with
-// `#[wasm_bindgen]`
 const { startup } = wasm_bindgen;
 
 async function run_wasm() {
-    // Load the wasm file by awaiting the Promise returned by `wasm_bindgen`
-    // `wasm_bindgen` was imported in `index.html`
-    //await wasm_bindgen('./pkg/game_of_life_web_bg.wasm');
+    let c = document.createElement('canvas');
+    c.width = document.body.clientWidth;
+    c.height = document.body.clientHeight;
+    c.style['image-rendering'] = 'pixelated';
 
-    const width = 1000;
-    const height = 1000;
+    let ctx = c.getContext('2d');
+    let oc = new OffscreenCanvas(1024, 1024);
+    let octx = oc.getContext('2d');
+
+    let id = new ImageData(oc.width, oc.height);
 
     const w = new Worker('./worker.js');
-    let c = document.createElement('canvas');
-    c.width = width;
-    c.height = height;
-    c.style.width = '100%';
-    c.style.height = '100%';
-    c.style['image-rendering'] = 'pixelated';
-    let ctx = c.getContext('2d');
-    let id = new ImageData(width, height);
-    //id.data.set([120, 180, 44, 255, 99, 110, 255, 255, 0, 0, 255, 255, 255, 0, 0, 255])
-    //ctx.putImageData(id, 0, 0);
     let t;
     w.addEventListener('message', (e) => {
+        ctx.clearRect(0, 0, c.width, c.height);
+
         console.log(performance.now() - t);
         id.data.set(e.data);
-        ctx.putImageData(id, 0, 0);
+        octx.putImageData(id, 0, 0);
+        let p = ctx.createPattern(oc, 'repeat');
+        ctx.fillStyle = p;
+        ctx.fillRect(0, 0, c.width, c.height);
+
+        console.log('render');
         console.log(performance.now() - t);
     });
-    const states = [...Array(width * height).keys()].map((d) => [0, 0, 0, Math.random() > 0.9 ? 255 : 0]).flat();
-    console.log(states.length);
-    w.postMessage({ width, height, states });
+
+    window.addEventListener('resize', (e) => {
+        c.width = document.body.clientWidth;
+        c.height = document.body.clientHeight;
+
+        let p = ctx.createPattern(oc, 'repeat');
+        ctx.fillStyle = p;
+        ctx.fillRect(0, 0, c.width, c.height);
+        console.log('render');
+    });
+
+    const states = [...Array(oc.width * oc.height).keys()].map((d) => [0, 0, 0, Math.random() > 0.9 ? 255 : 0]).flat();
+    w.postMessage({ type: 'init', width: oc.width, height: oc.height, states });
+    w.postMessage({ type: 'step' });
+
     document.body.addEventListener('click', () => {
         t = performance.now();
-        w.postMessage(null);
-    })
-    document.body.appendChild(c);
+        w.postMessage({ type: 'step' });
+    });
 
-    // Run main WASM entry point
-    // This will create a worker from within our Rust code compiled to WASM
-    //startup();
+    document.body.appendChild(c);
 }
 
 run_wasm();
