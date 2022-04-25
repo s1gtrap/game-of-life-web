@@ -1,6 +1,6 @@
 const { startup } = wasm_bindgen;
 
-async function run_wasm() {
+async function createGameOfLife() {
     let c = document.createElement('canvas');
     c.width = document.body.clientWidth;
     c.height = document.body.clientHeight;
@@ -24,7 +24,7 @@ async function run_wasm() {
         ctx.fillStyle = p;
         ctx.fillRect(0, 0, c.width, c.height);
 
-        console.log('render');
+        //console.log('render');
         //console.log(performance.now() - t);
     });
 
@@ -83,7 +83,7 @@ async function run_wasm() {
         //w.postMessage({ type: 'step' });
     });
 
-    document.body.appendChild(c);
+    return c;
 }
 
-run_wasm();
+//(async () => document.body.appendChild(await createGameOfLife()))();

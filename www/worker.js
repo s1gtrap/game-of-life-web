@@ -4,7 +4,7 @@ const { init, step } = wasm_bindgen;
 
 let life, handle, data;
 self.addEventListener('message', async (e) => {
-    console.log('msg', e);
+    //console.log('msg', e);
     switch (e.data.type) {
         case 'init':
             console.log(`init w=${e.data.width} h=${e.data.height} states.length=${e.data.states.length}`);
@@ -16,7 +16,7 @@ self.addEventListener('message', async (e) => {
             break;
 
         case 'step':
-            console.log('step');
+            //console.log('step');
             step(handle, data);
             self.postMessage(data);
             break;
