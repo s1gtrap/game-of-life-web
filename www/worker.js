@@ -12,6 +12,7 @@ self.addEventListener('message', async (e) => {
             handle = init(e.data.width, e.data.height, e.data.states);
             data = new Uint8Array(e.data.width * e.data.height * 4);
             data.set(e.data.states);
+            self.postMessage(data);
             break;
 
         case 'step':
